@@ -12,6 +12,7 @@ function Floatable() {
 	this.div.className = "floatableDiv";
 	this.pageDiv.appendChild(this.div);
 	this.innerDiv = document.createElement("div");
+	this.innerDiv.style.zIndex = 2;
 	this.div.appendChild(this.innerDiv);
 	this.innerDiv.className = "innerDiv";
 
@@ -68,10 +69,14 @@ Floatable.prototype.addImage = function(image, width, height) {
 	this.canvas.style.position = "absolute";
 	this.canvas.style.top = "0px";
 	this.canvas.style.left = "0px";
+	this.canvas.style.zIndex = 1;
 	var ctx = this.canvas.getContext("2d");
 	ctx.drawImage(this.image, 0, 0, width - 1, height - 1);
 
 	this.div.appendChild(this.canvas);
+	if (image.src.indexOf("images/block.png") > -1) {
+		this.innerDiv.style.color = "white";
+	}
 };
 
 Floatable.prototype.addText = function(text) {

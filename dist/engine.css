@@ -3,6 +3,7 @@
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
+	font-family: cursive, sans-serif;
 }
 
 body {
@@ -84,7 +85,7 @@ a {
 
 .innerDiv {
 	text-align: center;
-	color: white;
+	color: black;
 	width: inherit;
 	position: absolute;
 }
@@ -316,7 +317,7 @@ a.boxclose{
 	display: none;
 	width: 50%;
 }
-    
+
 .serif {
 	font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
 }

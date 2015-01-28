@@ -6,15 +6,22 @@ function Transaction(bitcoins, highlight, currency, currencyName) {
 	if (document.visibilityState === "visible") {
 		Floatable.call(this);
 
-		this.area = bitcoins * 100 + 3000;
+		this.area = bitcoins / 1;
+		var minWidth = 100;
+		var maxWidth = 900;
 		this.width = this.height = Math.sqrt(this.area / Math.PI) * 2;
-
+		if (this.width > maxWidth) {
+			this.width = this.height = maxWidth;
+		}
+		if (this.width < minWidth) {
+			this.width = this.height = minWidth;
+		}
 		this.addImage(bubbleImage, this.width, this.height);
 	
-		var bitcoinString = "&#3647;" + bitcoins.toFixed(2);
+		var bitcoinString = "&#272;" + bitcoins.toFixed(2);
 	
-		if (bitcoinString == "&#3647;0.00")
-		bitcoinString = "<&#3647;0.01";
+		if (bitcoinString == "&#272;0.00")
+		bitcoinString = "<&#272;0.01";
 	
 		if (!highlight) {
 			this.addText(bitcoinString);
@@ -28,7 +35,7 @@ function Transaction(bitcoins, highlight, currency, currencyName) {
 	}
 
 	// Sound
-	var maxBitcoins = 1000;
+	var maxBitcoins = 5000000;
 	var minVolume = 0.3;
 	var maxVolume = 0.7;
 	var volume = bitcoins / (maxBitcoins / (maxVolume - minVolume)) + minVolume;
