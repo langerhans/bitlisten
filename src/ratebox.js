@@ -11,7 +11,7 @@ rateboxGetRate = function() {
         $.getJSON(api_url, function (jsonp) {
           var ticker = $.parseJSON(jsonp.data.prices[0].price);
           if (ticker) {
-            $("#rate").html(parseFloat(ticker).toFixed(8) * 100000000);
+            $("#rate").html(Math.round(parseFloat(ticker).toFixed(8) * 100000000));
           } else {
             rateboxTimeout = setTimeout(rateboxGetRate, ratebox_ms);
           }
