@@ -9,7 +9,7 @@ rateboxGetRate = function() {
 		//var yql_url = '//query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D"' + api_url + '"&format=json&callback=?';
 		
         $.getJSON(api_url, function (jsonp) {
-          var ticker = $.parseJSON(jsonp.data.prices[1].price);
+          var ticker = $.parseJSON(jsonp.data.prices[0].price);
           if (ticker) {
             $("#rate").html(parseFloat(ticker).toFixed(8) * 100000000);
           } else {
