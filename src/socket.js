@@ -15,7 +15,7 @@ TransactionSocket.init = function() {
 		TransactionSocket.connection.close();
 
 	if ('WebSocket' in window) {
-		var connection = new ReconnectingWebSocket('wss://ws.dogechain.info/inv');
+		var connection = new ReconnectingWebSocket('wss://slanger1.sochain.com/app/e9f5cc20074501ca7395?protocol=7');
 		TransactionSocket.connection = connection;
 
 		StatusBox.reconnecting("blockchain");
@@ -23,17 +23,25 @@ TransactionSocket.init = function() {
 		connection.onopen = function() {
 			console.log('dogechain.info: Connection open!');
 			StatusBox.connected("blockchain");
-			var newTransactions = {
-				"op" : "unconfirmed_sub"
+			var chainInfo = {
+				"event":"pusher:subscribe",
+				"data":{ "auth":"", "channel":"blockchain_update_doge" }
 			};
-			var newBlocks = {
-				"op" : "blocks_sub"
+
+			var addressMonitor = {
+				"event":"pusher:subscribe",
+				"data":{ "auth":"", "channel":"address_doge_" + DONATION_ADDRESS }
 			};
-			connection.send(JSON.stringify(newTransactions));
-			connection.send(JSON.stringify(newBlocks));
-			connection.send(JSON.stringify({
-				"op" : "ping_tx"
-			}));
+
+			var ticker = {
+				"event":"pusher:subscribe",
+				"data":{ "auth":"", "channel":"ticker_doge_btc" }
+			};
+
+			connection.send(JSON.stringify(chainInfo));
+			connection.send(JSON.stringify(addressMonitor));
+			connection.send(JSON.stringify(ticker));
+			//connection.send(JSON.stringify(newBlocks));
 			// Display the latest transaction so the user sees something.
 		};
 
@@ -50,45 +58,36 @@ TransactionSocket.init = function() {
 		};
 
 		connection.onmessage = function(e) {
-			var data = JSON.parse(e.data);
+			var msg = JSON.parse(e.data);
 
-			// New Transaction
-			if (data.op == "utx") {
-				var transacted = 0;
-
-				for (var i = 0; i < data.x.outputs.length; i++) {
-					transacted += data.x.outputs[i].value;
-				}
-
-				var bitcoins = transacted / satoshi;
-				//console.log("Transaction: " + bitcoins + " BTC");
-
-				var donation = false;
-                                var soundDonation = false;
-				var outputs = data.x.outputs;
-				for (var j = 0; j < outputs.length; j++) {
-					if ((outputs[j].addr) == DONATION_ADDRESS) {
-						bitcoins = data.x.outputs[j].value / satoshi;
-						new Transaction(bitcoins, true);
-						return;
-					}
-				}
+			switch (msg.event) {
+			case "tx_update":
+				var data = JSON.parse(msg.data);
+				var coins = data.value.sent_value;
 
 				setTimeout(function() {
-					new Transaction(bitcoins);
+					new Transaction(coins);
 				}, Math.random() * DELAY_CAP);
+				break;
+			case "block_update":
+				var data = JSON.parse(msg.data);
+				var blockHeight = data.value.block_no;
+				var transactions = data.value.total_txs;
+				var diff = data.value.mining_difficulty;
+				var blockSize = data.value.size;
 
-			} else if (data.op == "block") {
-				var blockHeight = data.x.height;
-				var transactions = data.x.n_tx;
-				var diff = data.x.difficulty;
-				var blockSize = data.x.size;
-				// Filter out the orphaned blocks.
-				if (blockHeight > lastBlockHeight) {
-					lastBlockHeight = blockHeight;
-					console.log("New Block");
-					new Block(blockHeight, transactions, diff, blockSize);
-				}
+				lastBlockHeight = blockHeight;
+				new Block(blockHeight, transactions, diff, blockSize);
+				break;
+			case "balance_update":
+				var data = JSON.parse(msg.data);
+				var coins = data.sent_value;
+				new Block(coins, true);
+				break;
+			case "price_update":
+				var data = JSON.parse(msg.data);
+				$("#rate").html(parseFloat(data.value.price).toFixed(8) * 100000000);
+				if (rateboxTimeout) clearTimeout(rateboxTimeout);
 			}
 
 		};
